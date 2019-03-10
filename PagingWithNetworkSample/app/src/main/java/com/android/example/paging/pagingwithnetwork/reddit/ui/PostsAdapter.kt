@@ -33,6 +33,7 @@ class PostsAdapter(
         private val retryCallback: () -> Unit)
     : PagedListAdapter<RedditPost, RecyclerView.ViewHolder>(POST_COMPARATOR) {
     private var networkState: NetworkState? = null
+
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         when (getItemViewType(position)) {
             R.layout.reddit_post_item -> (holder as RedditPostViewHolder).bind(getItem(position))

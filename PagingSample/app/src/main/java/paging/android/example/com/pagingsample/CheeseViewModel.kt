@@ -17,8 +17,10 @@
 package paging.android.example.com.pagingsample
 
 import android.app.Application
+import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.paging.Config
+import androidx.paging.PagedList
 import androidx.paging.toLiveData
 
 /**
@@ -26,6 +28,8 @@ import androidx.paging.toLiveData
  */
 class CheeseViewModel(app: Application) : AndroidViewModel(app) {
     val dao = CheeseDb.get(app).cheeseDao()
+
+    val TAG = "CheeseViewModel"
 
     /**
      * We use -ktx Kotlin extension functions here, otherwise you would use LivePagedListBuilder(),
@@ -41,7 +45,9 @@ class CheeseViewModel(app: Application) : AndroidViewModel(app) {
              * user scrolling on a large device is expected to scroll through items more quickly
              * than a small device, such as when the large device uses a grid layout of items.
              */
-            pageSize = 30,
+            pageSize = 20,
+
+            prefetchDistance = 5,
 
             /**
              * If placeholders are enabled, PagedList will report the full size but some items might
@@ -58,7 +64,25 @@ class CheeseViewModel(app: Application) : AndroidViewModel(app) {
              * <p>
              * This number triggers the PagedList to start dropping distant pages as more are loaded.
              */
-            maxSize = 200))
+            maxSize = 200),
+            boundaryCallback = object : PagedList.BoundaryCallback<Cheese>() {
+                override fun onZeroItemsLoaded() {
+                    super.onZeroItemsLoaded()
+                    Log.d(TAG, "onZeroItemsLoaded()")
+                }
+
+                override fun onItemAtEndLoaded(itemAtEnd: Cheese) {
+                    super.onItemAtEndLoaded(itemAtEnd)
+                    Log.d(TAG, "onItemAtEndLoaded() $itemAtEnd")
+
+                }
+
+                override fun onItemAtFrontLoaded(itemAtFront: Cheese) {
+                    super.onItemAtFrontLoaded(itemAtFront)
+                    Log.d(TAG, "onItemAtFrontLoaded() $itemAtFront")
+
+                }
+            })
 
     fun insert(text: CharSequence) = ioThread {
         dao.insert(Cheese(id = 0, name = text.toString()))

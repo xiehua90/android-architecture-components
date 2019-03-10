@@ -16,8 +16,10 @@
 
 package com.android.example.paging.pagingwithnetwork.repository
 
+import com.android.example.paging.pagingwithnetwork.reddit.Person
 import com.android.example.paging.pagingwithnetwork.reddit.api.RedditApi
 import com.android.example.paging.pagingwithnetwork.reddit.vo.RedditPost
+import io.reactivex.Observable
 import retrofit2.Call
 import retrofit2.mock.Calls
 import java.io.IOException
@@ -26,9 +28,14 @@ import java.io.IOException
  * implements the RedditApi with controllable requests
  */
 class FakeRedditApi : RedditApi {
+    override fun getTopTest(): Observable<Person> {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
     // subreddits keyed by name
     private val model = mutableMapOf<String, SubReddit>()
     var failureMsg: String? = null
+
     fun addPost(post: RedditPost) {
         val subreddit = model.getOrPut(post.subreddit) {
             SubReddit(items = arrayListOf())

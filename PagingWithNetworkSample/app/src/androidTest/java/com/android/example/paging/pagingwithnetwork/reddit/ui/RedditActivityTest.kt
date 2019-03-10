@@ -18,6 +18,7 @@ package com.android.example.paging.pagingwithnetwork.reddit.ui
 
 import android.app.Application
 import android.content.Intent
+import android.util.Log
 import androidx.arch.core.executor.testing.CountingTaskExecutorRule
 import androidx.test.InstrumentationRegistry
 import androidx.recyclerview.widget.RecyclerView
@@ -29,14 +30,22 @@ import com.android.example.paging.pagingwithnetwork.reddit.repository.RedditPost
 import com.android.example.paging.pagingwithnetwork.reddit.ui.RedditActivity.Companion.DEFAULT_SUBREDDIT
 import com.android.example.paging.pagingwithnetwork.repository.FakeRedditApi
 import com.android.example.paging.pagingwithnetwork.repository.PostFactory
+import io.reactivex.Observer
+import io.reactivex.disposables.Disposable
+import okhttp3.*
+import okhttp3.logging.HttpLoggingInterceptor
 import org.hamcrest.CoreMatchers.`is`
 import org.hamcrest.CoreMatchers.notNullValue
 import org.hamcrest.MatcherAssert.assertThat
+import org.junit.Assert
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.Parameterized
+import retrofit2.Retrofit
+import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory
+import retrofit2.converter.gson.GsonConverterFactory
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.TimeoutException
@@ -106,4 +115,77 @@ class RedditActivityTest(private val type: RedditPostRepository.Type) {
         }
         assertThat(latch.await(10, TimeUnit.SECONDS), `is`(true))
     }
+
+    @Test
+    fun redditTopTest() {
+//        logger.level = HttpLoggingInterceptor.Level.BASIC
+
+
+//        val client = OkHttpClient.Builder()
+//
+//
+//                .build()
+//
+////        //https://www.reddit.com/
+//        val api =  Retrofit.Builder()
+//                .baseUrl("http://www.baidu.com/")
+//                .client(client)
+//                .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
+//                .addConverterFactory(GsonConverterFactory.create())
+//                .build()
+//                .create(RedditApi::class.java)
+//
+//        val api = RedditApi.create()
+
+
+//                        .addInterceptor{
+//                            val body = ResponseBody.create(MediaType.parse("application/x-www-form-urlencoded"), "{content: Hello World}")
+//                            val response = Response.Builder()
+//                                    .request(it.request())
+//                                    .protocol(Protocol.HTTP_1_1)
+//                                    .code(200)
+//                                    .body(body)
+//                                    .message("Test Message")
+//                                    .build()
+//                            response
+//                        }
+
+        val logger = HttpLoggingInterceptor(HttpLoggingInterceptor.Logger {
+            Log.d("API", it)
+        })
+        logger.level = HttpLoggingInterceptor.Level.BASIC
+
+
+        val jsonStr = "{\"name\":\"Victor Apoyan\"}"
+        val client = OkHttpClient.Builder()
+                .addInterceptor {
+                    val body = ResponseBody.create(MediaType.parse("application/json"), jsonStr.toByteArray())
+                    val response = Response.Builder()
+                            .code(200)
+                            .message(jsonStr)
+                            .request(it.request())
+                            .protocol(Protocol.HTTP_1_0)
+                            .body(body)
+                            .addHeader("content-type", "application/json")
+                            .build()
+                    response
+                }
+                .build()
+        val api = Retrofit.Builder()
+                .baseUrl("https://news.baidu.com/")
+                .client(client)
+                .addConverterFactory(GsonConverterFactory.create())
+                .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
+                .build()
+                .create(RedditApi::class.java)
+
+        api.getTopTest()
+                .subscribe {
+                    Log.d("API", it.toString())
+                }
+
+        Assert.assertNotNull("HelloWorld")
+    }
+
+
 }

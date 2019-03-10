@@ -50,8 +50,11 @@ abstract class CheeseDb : RoomDatabase() {
         private fun fillInDb(context: Context) {
             // inserts in Room are executed on the current thread, so we insert in the background
             ioThread {
-                get(context).cheeseDao().insert(
-                        CHEESE_DATA.map { Cheese(id = 0, name = it) })
+                get(context).cheeseDao().insert(CHEESE_DATA
+                                                        .filterIndexed { index, _ -> index < 50 }
+                                                        .map { Cheese(id = 0, name = it) })
+//                get(context).cheeseDao().insert(
+//                        CHEESE_DATA.map { Cheese(id = 0, name = it) })
             }
         }
     }
